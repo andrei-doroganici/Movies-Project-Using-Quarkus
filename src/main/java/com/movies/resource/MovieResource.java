@@ -14,8 +14,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.util.List;
-
 @ApplicationScoped
 @Path("/movies")
 public class MovieResource {
@@ -34,13 +32,13 @@ public class MovieResource {
     @GET
     @Path("{id}")
     public Response getById(@PathParam("id") Long id) {
-        List<Movie> responseMovies = movieService.getAllMovies();
+//        List<Movie> responseMovies = movieService.getAllMovies();
         Movie foundMovie = externalService.getMovieById(id);
 
         if (foundMovie != null) {
             return Response.ok(foundMovie).build();
         }
-        return Response.ok("Not existing id").build();
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @PUT
