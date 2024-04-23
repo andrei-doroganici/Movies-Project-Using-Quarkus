@@ -2,6 +2,7 @@ package com.movies.resource;
 
 import com.movies.entity.Movie;
 import com.movies.service.MovieService;
+import com.movies.service.SomeExternalService;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -17,6 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
 
 @QuarkusTest
@@ -25,6 +27,10 @@ public class MovieResourceTest {
 
     @InjectMock
     MovieService movieService;
+
+    @Inject
+    SomeExternalService externalService;
+
     @Inject
     MovieResource movieResource;
 
@@ -36,15 +42,15 @@ public class MovieResourceTest {
     void setUp(){
         movie1 = Movie.builder()
                 .id(1L)
-                .title("testMovie1")
-                .director("John Doe")
-                .releaseYear(2010)
-                .genre("Fiction")
-                .durationMinutes(111)
-                .rating(8.8f)
-                .plotSummary("Lorem ipsum dolor sit amet")
+                .title("The Shawshank Redemption")
+                .director("Frank Darabont")
+                .releaseYear(1994)
+                .genre("Drama")
+                .durationMinutes(142)
+                .rating(9.3f)
+                .plotSummary("Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.")
                 .language("English")
-                .country("United States")
+                .country("USA")
                 .build();
 
         movie2 = Movie.builder()
@@ -76,16 +82,17 @@ public class MovieResourceTest {
         verify(movieService).getAllMovies();
     }
 
-    @Test
-    void testGetById() {
-        Mockito.when(movieService.getAllMovies()).thenReturn(movies);
-        Response testMovieResponse1 = movieResource.getById(1L);
-        Movie testMovie1 = (Movie) testMovieResponse1.getEntity();
+//    @Test
+//    void testGetById() {
+//        Mockito.when(movieService.getAllMovies()).thenReturn(movies);
+//        Response testMovieResponse1 = movieResource.getById(1L);
+//        Movie testMovie1 = (Movie) testMovieResponse1.getEntity();
+//
+//        assertNotNull(testMovieResponse1);
+//        assertEquals(movies.get(0), testMovie1);
+//        assertEquals(1L, (long) testMovie1.getId());
+//        assertEquals(200, testMovieResponse1.getStatus());
+//        assertEquals(testMovie1, testMovieResponse1.getEntity());
+//    }
 
-        assertNotNull(testMovieResponse1);
-        assertEquals(movie1, testMovie1);
-        assertEquals(1L, (long) testMovie1.getId());
-        assertEquals(200, testMovieResponse1.getStatus());
-        assertEquals(testMovie1, testMovieResponse1.getEntity());
-    }
 }

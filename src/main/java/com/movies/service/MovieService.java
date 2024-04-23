@@ -10,11 +10,14 @@ import java.util.List;
 @ApplicationScoped
 public class MovieService {
 
+//    @Inject
+//    private MovieRepository movieRepository;
+
     @Inject
-    private MovieRepository movieRepository;
+    private SomeExternalService externalService;
 
     public List<Movie> getAllMovies() {
-        return  movieRepository.getMovies();
+        return  externalService.getAllMovies();
     }
 
     public Movie addMovie(Movie movie) {
