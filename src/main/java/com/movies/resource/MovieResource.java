@@ -1,5 +1,7 @@
 package com.movies.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.movies.entity.Movie;
 import com.movies.service.MovieService;
 import com.movies.service.SomeExternalService;
@@ -11,8 +13,11 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.List;
 
 @ApplicationScoped
 @Path("/movies")
@@ -25,14 +30,16 @@ public class MovieResource {
     SomeExternalService externalService;
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
         return Response.ok(movieService.getAllMovies()).build();
     }
 
     @GET
     @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@PathParam("id") Long id) {
-//        List<Movie> responseMovies = movieService.getAllMovies();
+        List<Movie> responseMovies = movieService.getAllMovies();
         Movie foundMovie = externalService.getMovieById(id);
 
         if (foundMovie != null) {
@@ -40,6 +47,23 @@ public class MovieResource {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
+
+    @GET
+    @Path("genre/{genre}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMoviesByGenre(@PathParam("genre") String genre) {
+        List<Movie> movies = externalService.getMoviesByGenre(genre);
+        return Response.ok(movies).build();
+    }
+
+    @GET
+    @Path("director/{director}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMoviesByDirector(@PathParam("director") String director) {
+        List<Movie> movies = externalService.getMoviesByDirector(director);
+        return Response.ok(movies).build();
+    }
+
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -51,6 +75,7 @@ public class MovieResource {
 
     @PUT
     @Path("{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response updateMovie(@PathParam("id") Long id, Movie movie) {
         Movie updatedMovie = movieService.updateMovie(id, movie);
         System.out.println("PUT update movie : " + updatedMovie);

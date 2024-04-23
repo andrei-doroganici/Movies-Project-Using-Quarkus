@@ -23,10 +23,14 @@ public class SomeExternalServiceTest {
 
     @InjectMock
     MovieService movieService;
+
     @Inject
     SomeExternalService someExternalService;
+
     private Movie movie1;
+
     private Movie movie2;
+
     List<Movie> movies;
 
     @BeforeEach

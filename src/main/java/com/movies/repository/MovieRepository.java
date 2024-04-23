@@ -10,6 +10,7 @@ import java.util.List;
 @ApplicationScoped
 public class MovieRepository {
 
+    // region movie object properties config
     @ConfigProperty(name = "movies.1.id")
     private Long movie1Id;
     @ConfigProperty(name = "movies.1.title")
@@ -72,6 +73,8 @@ public class MovieRepository {
     private String movie3Language;
     @ConfigProperty(name = "movies.3.country")
     private String movie3Country;
+
+    //endregion
 
     public List<Movie> getMovies(){
         List<Movie> movies = new ArrayList<>();
