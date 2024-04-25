@@ -1,9 +1,7 @@
 package com.movies.service;
 
 import com.movies.entity.Movie;
-import com.movies.repository.MovieRepository;
 import io.quarkus.test.InjectMock;
-import io.quarkus.test.Mock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,15 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 @ExtendWith(MockitoExtension.class)
@@ -27,9 +24,6 @@ public class SomeExternalServiceMockitoTest {
 
     @InjectMock
     SomeExternalService someExternalService;
-
-//    @Inject
-//    MovieRepository movieRepository;
 
     private Movie movie1;
 
@@ -78,28 +72,24 @@ public class SomeExternalServiceMockitoTest {
         movieList = List.of(movie1, movie2, movie3);
     }
 
+    // serviciul extern intoarece acelasi raspuns pentru orice chemare
     @Test
-    public void testGetMovieByIdAlwaysReturnsSameMovie() {
-        Mockito.when(someExternalService.getAllMovies()).thenReturn(movieList);
-        Mockito.when(someExternalService.getMovieById(1L)).thenReturn(movie1);
+    public void getAllMovies_AlwaysReturnsSameList() {
+        when(someExternalService.getAllMovies()).thenReturn(movieList);
 
-        Movie expectedMovie = movie1;
-
-        Movie resultMovie1 = someExternalService.getMovieById(1L);
-        Movie resultMovie2 = someExternalService.getMovieById(1L);
-
+        assertEquals(movieList, someExternalService.getAllMovies());
+        assertEquals(movieList, someExternalService.getAllMovies());
         assertFalse(movieList.isEmpty());
-        assertEquals(expectedMovie, resultMovie1);
-        assertEquals(expectedMovie, resultMovie2);
+        assertEquals(3, movieList.size());
     }
 
+    // serviciul extern intoarce raspunsuri diferite pentru chemari consecutive
     @Test
     public void testGetMoviesSortedReturnsDifferentListsConsecutively() {
         List<Movie> firstCallMovies = List.of(movie1);
         List<Movie> secondCallMovies = List.of(movie2);
 
-        Mockito.when(someExternalService.getAllMovies())
-                .thenReturn(firstCallMovies, secondCallMovies);
+        when(someExternalService.getAllMovies()).thenReturn(firstCallMovies, secondCallMovies);
 
         assertNotNull(firstCallMovies);
         assertNotNull(secondCallMovies);
@@ -107,12 +97,12 @@ public class SomeExternalServiceMockitoTest {
         assertEquals(secondCallMovies, someExternalService.getAllMovies());
     }
 
+    // serviciul extern intoarce raspusnuri in functie de valoarea la parametri
     @Test
     public void testGetMoviesByGenreBasedOnParameters() {
-        Mockito.when(someExternalService.getAllMovies()).thenReturn(movieList);
-        Mockito.when(someExternalService.getMoviesByGenre("Fiction")).thenReturn(List.of(movie1));
-        Mockito.when(someExternalService.getMoviesByGenre("Drama")).thenReturn(List.of(movie2, movie3));
-
+        when(someExternalService.getAllMovies()).thenReturn(movieList);
+        when(someExternalService.getMoviesByGenre("Fiction")).thenReturn(List.of(movie1));
+        when(someExternalService.getMoviesByGenre("Drama")).thenReturn(List.of(movie2, movie3));
 
         List<Movie> fictionMovies = someExternalService.getMoviesByGenre("Fiction");
         List<Movie> dramaMovies = someExternalService.getMoviesByGenre("Drama");
@@ -124,23 +114,11 @@ public class SomeExternalServiceMockitoTest {
         assertEquals(movie2, dramaMovies.get(0));
     }
 
+    // serviciul extern semnaleaza o careva eroare
     @Test
     public void getAllMovies_doesThrowsException() {
-        Mockito.when(someExternalService.getAllMovies()).thenThrow(NullPointerException.class);
+        when(someExternalService.getAllMovies()).thenThrow(NullPointerException.class);
         assertThrows(NullPointerException.class, () -> someExternalService.getAllMovies());
     }
-
-//    @Test
-//    public void testSpyServiceModifiesBehaviorSelectively() {
-//        SomeExternalService spyService = Mockito.spy(someExternalService);
-//        List<Movie> expectedMovies = movieList;
-//
-//        Mockito.doReturn(expectedMovies).when(spyService).getMoviesByGenre("Drama");
-//
-//        assertEquals(expectedMovies, spyService.getMoviesByGenre("Drama"));
-//        Mockito.verify(spyService, Mockito.times(1)).getMoviesByGenre("Drama");
-//        Mockito.doReturn(List.of()).when(spyService).getMoviesByGenre("Drama");
-//        assertEquals(List.of(), spyService.getMoviesByGenre("Drama"));
-//    }
 
 }

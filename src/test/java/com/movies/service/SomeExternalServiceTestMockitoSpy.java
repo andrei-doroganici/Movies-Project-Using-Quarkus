@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @QuarkusTest
 @ExtendWith(MockitoExtension.class)
@@ -66,48 +66,18 @@ public class SomeExternalServiceTestMockitoSpy {
                 .build();
 
         movieList = List.of(movie1, movie2, movie3);
-        Mockito.doReturn(movieList).when(someExternalService).getAllMovies();
+//        Mockito.doReturn(movieList).when(someExternalService).getAllMovies();
     }
 
+    // serviciul extern intoarce lista de valori definite in clasa SomeExternalService
     @Test
-    public void testSpyServiceModifiesBehaviorSelectively() {
-        // Since someExternalService is already a spy due to @InjectSpy, you can directly modify its behavior
-        List<Movie> expectedMovies = movieList;
+    void given_getAllMovies_shouldReturnAllMovies() {
+        List<Movie> allMovies = someExternalService.getAllMovies();
 
-        Mockito.doReturn(expectedMovies).when(someExternalService).getMoviesByGenre("Drama");
-
-        assertEquals(expectedMovies, someExternalService.getMoviesByGenre("Drama"));
-        Mockito.verify(someExternalService, Mockito.times(1)).getMoviesByGenre("Drama");
-        Mockito.doReturn(List.of()).when(someExternalService).getMoviesByGenre("Drama");
-        assertEquals(List.of(), someExternalService.getMoviesByGenre("Drama"));
+        assertNotNull(allMovies);
+        assertEquals(3, allMovies.size());
+        assertNotNull(allMovies.get(0));
+        assertNotEquals(movieList, allMovies);
+        Mockito.verify(someExternalService).getAllMovies();
     }
-
-    @Test
-    public void testGetMoviesByGenreWithDynamicResponse() {
-        // Prepare test data
-        List<Movie> allMovies = List.of(
-                new Movie(1L, "Drama Movie", "Director A", 2020, "Drama"),
-                new Movie(2L, "Action Movie", "Director B", 2021, "Action")
-        );
-
-        // Setup the spy to return all movies
-        Mockito.doReturn(allMovies).when(someExternalService).getAllMovies();
-
-        // Use thenAnswer to dynamically filter movies by genre
-        Mockito.when(someExternalService.getMoviesByGenre(Mockito.anyString())).thenAnswer(invocation -> {
-            String genre = invocation.getArgument(0, String.class);
-            return allMovies.stream()
-                    .filter(movie -> movie.getGenre().equals(genre))
-                    .collect(Collectors.toList());
-        });
-
-        // Execute and verify
-        List<Movie> dramaMovies = someExternalService.getMoviesByGenre("Drama");
-        assertEquals(1, dramaMovies.size());
-        assertEquals("Drama Movie", dramaMovies.get(0).getTitle());
-
-        // Verify that the method was called with the correct argument
-        Mockito.verify(someExternalService).getMoviesByGenre("Drama");
-    }
-
 }
